@@ -142,6 +142,15 @@ describe User do
       expect(@user.microposts.to_a).to eq [newer_micropost, older_micropost]
     end
 
+    it "should destroy associated microposts" do
+      microposts = @user.microposts.to_a
+      @user.destroy
+      expect(microposts).not_to be_empty
+      microposts.each do |micropost|
+        expect(Micropost.where(id: micropost.id)).to be_empty
+      end
+    end
+
     describe "status" do
       let(:unfollowed_post) { FactoryGirl.create(:micropost, user:
                                                   FactoryGirl.create(:user)) }
@@ -170,6 +179,15 @@ describe User do
 
     it { should be_following(other_user) }
     its(:followed_users) { should include(other_user) }
+
+    it "should destroy associated relationships" do
+      relationships = @user.relationships.to_a
+      @user.destroy
+      expect(relationships).not_to be_empty
+      relationships.each do |relationship|
+        expect(Relationship.where(id: relationship.id)).to be_empty
+      end
+    end
 
     describe "and unfollowing" do
       before { @user.unfollow!(other_user) }
